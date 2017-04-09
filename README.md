@@ -66,9 +66,6 @@ clean_cache=false
 # We can change the filename for the compile script with this option
 compile="compile"
 
-# Add the config vars you want to be exported here
-config_vars_to_export=(DATABASE_URL)
-
 # We can set the version of Node to use for the app here
 node_version=5.3.0
 
@@ -80,18 +77,18 @@ phoenix_relative_path=.
 
 # Remove node and node_modules directory to keep slug size down if it is not needed.
 remove_node=false
+
+# We can change path that npm dependencies are in relation to phoenix app. E.g. assets for phoenix 1.3 support.
+assets_path=.
+
+# We can change phoenix mix namespace tasks. E.g. phx for phoenix 1.3 support.
+phoenix_ex=phoenix
 ```
 
 ## Compile
 
 By default, Phoenix uses `brunch` and recommends you to use `mix phoenix.digest` in production. For that, we have a default `compile` shell script which gets run after building dependencies and
-just before finalizing the build. The `compile` file looks like this:
-
-```bash
-info "Building Phoenix static assets"
-brunch build --production
-mix phoenix.digest
-```
+just before finalizing the build. The `compile` file [looks like this](https://github.com/gjaldon/heroku-buildpack-phoenix-static/blob/master/compile).
 
 To customize your app's compile hook, just add a `compile` file to your app's root directory.
 `compile` is just a shell script, so you can use any valid `bash` code. Keep in mind you'll have
@@ -99,8 +96,9 @@ access to your `node_modules` and `mix`. This means that if you're using a Node 
 
 ```bash
 # app_root/compile
-gulp build:dist
-mix phoenix.digest
+cd $phoenix_dir
+npm --prefix ./assets run build
+mix "${phoenix_ex}.digest" #use the ${phoenix_ex} variable instead of hardcoding phx or phoenix
 ```
 
 The above `compile` overrides the default one. :)
